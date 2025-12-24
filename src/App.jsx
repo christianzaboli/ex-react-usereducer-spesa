@@ -7,7 +7,21 @@ const products = [
   { name: "Pasta", price: 0.7 },
 ];
 function App() {
-  return <></>;
+  return (
+    <>
+      <main>
+        <ul>
+          {products.map((p) => {
+            return (
+              <li>
+                Nome: {p.name} Prezzo: {p.price}$
+              </li>
+            );
+          })}
+        </ul>
+      </main>
+    </>
+  );
 }
 
 export default App;
