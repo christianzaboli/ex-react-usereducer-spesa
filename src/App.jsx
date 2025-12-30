@@ -24,13 +24,25 @@ function App() {
     );
   }
 
+  function updateProductQuantity(name, newQuantity) {
+    if (newQuantity < 1) {
+      return;
+    }
+    setAddedProducts((prev) =>
+      prev.map((item) =>
+        item.name === name ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  }
+
   function removeFromCart(name) {
     setAddedProducts((prev) => prev.filter((item) => item.name !== name));
   }
 
-  let sumPay = addedProducts.reduce((tot, curr) => {
+  let sumToPay = addedProducts.reduce((tot, curr) => {
     return tot + curr.price * curr.quantity;
   }, 0);
+
   return (
     <>
       <main>
@@ -50,13 +62,23 @@ function App() {
           {addedProducts?.map((p, i) => {
             return (
               <li key={i}>
-                Nome: {p.name}, Prezzo: {p.price}, Quantitá: {p.quantity}
+                Nome: {p.name}, Prezzo: {p.price}, Quantitá:
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={p.quantity}
+                  onChange={(e) =>
+                    updateProductQuantity(p.name, Number(e.target.value))
+                  }
+                  required
+                />
                 <button onClick={() => removeFromCart(p.name)}>X</button>
               </li>
             );
           })}
         </ul>
-        <h4>Totale: {sumPay.toFixed(2)}</h4>
+        <h4>Totale: {sumToPay.toFixed(2)}</h4>
       </main>
     </>
   );
