@@ -8,38 +8,38 @@ const products = [
 ];
 
 function App() {
-  const [addedProducts, setAddedProducts] = useState([]);
+  const initialState = [];
+  const [state, dispatch] = useReducer(cartReducer, initialState);
+  function cartReducer(state, action) {
+    switch (action.type) {
+      case "ADD_ITEM":
+        const isProductAdded = state.some(
+          (item) => item.name === action.payload.name
+        );
+        if (isProductAdded) {
+          return state;
+        } else {
+          return [...state, { ...action.payload, quantity: 1 }];
+        }
 
-  function addToCart(i) {
-    const product = products[i];
+      case "REMOVE_ITEM":
+        return state.filter((p) => p.name !== action.payload);
 
-    setAddedProducts((prev) =>
-      prev.some((item) => item.name === product.name)
-        ? prev.map((item) =>
-            item.name === product.name
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          )
-        : [...prev, { ...product, quantity: 1 }]
-    );
-  }
-
-  function updateProductQuantity(name, newQuantity) {
-    if (newQuantity < 1) {
-      return;
+      case "UPDATE_QUANTITY":
+        if (action.payload.number < 1) {
+          return state;
+        }
+        return state.map((item) =>
+          item.name === action.payload.name
+            ? { ...item, quantity: action.payload.number }
+            : item
+        );
+      default:
+        return state;
     }
-    setAddedProducts((prev) =>
-      prev.map((item) =>
-        item.name === name ? { ...item, quantity: newQuantity } : item
-      )
-    );
   }
 
-  function removeFromCart(name) {
-    setAddedProducts((prev) => prev.filter((item) => item.name !== name));
-  }
-
-  let sumToPay = addedProducts.reduce((tot, curr) => {
+  let sumToPay = state.reduce((tot, curr) => {
     return tot + curr.price * curr.quantity;
   }, 0);
 
@@ -52,14 +52,18 @@ function App() {
             return (
               <li key={i}>
                 Nome: {p.name} Prezzo: {p.price}$
-                <button onClick={() => addToCart(i)}>+</button>
+                <button
+                  onClick={() => dispatch({ type: "ADD_ITEM", payload: p })}
+                >
+                  +
+                </button>
               </li>
             );
           })}
         </ul>
         <h3>Carrello</h3>
         <ul>
-          {addedProducts?.map((p, i) => {
+          {state?.map((p, i) => {
             return (
               <li key={i}>
                 Nome: {p.name}, Prezzo: {p.price}, Quantitá:
@@ -69,11 +73,20 @@ function App() {
                   step={1}
                   value={p.quantity}
                   onChange={(e) =>
-                    updateProductQuantity(p.name, Number(e.target.value))
+                    dispatch({
+                      type: "UPDATE_QUANTITY",
+                      payload: { number: Number(e.target.value), name: p.name },
+                    })
                   }
                   required
                 />
-                <button onClick={() => removeFromCart(p.name)}>X</button>
+                <button
+                  onClick={() =>
+                    dispatch({ type: "REMOVE_ITEM", payload: p.name })
+                  }
+                >
+                  X
+                </button>
               </li>
             );
           })}
