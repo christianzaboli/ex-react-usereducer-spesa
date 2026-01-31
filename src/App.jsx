@@ -1,20 +1,24 @@
-import { useState, useReducer } from "react";
-
+import { useReducer, useRef } from "react";
+import "./app.css";
 const products = [
   { name: "Mela", price: 0.5 },
   { name: "Pane", price: 1.2 },
   { name: "Latte", price: 1.0 },
   { name: "Pasta", price: 0.7 },
+  { name: "Tiramisu", price: 3.0 },
+  { name: "Sugo", price: 1.79 },
+  { name: "Marmellata", price: 2.0 },
 ];
 
 function App() {
+  const topRef = useRef();
   const initialState = [];
   const [state, dispatch] = useReducer(cartReducer, initialState);
   function cartReducer(state, action) {
     switch (action.type) {
       case "ADD_ITEM":
         const isProductAdded = state.some(
-          (item) => item.name === action.payload.name
+          (item) => item.name === action.payload.name,
         );
         if (isProductAdded) {
           return state;
@@ -25,6 +29,9 @@ function App() {
       case "REMOVE_ITEM":
         return state.filter((p) => p.name !== action.payload);
 
+      case "CLEAR_ITEM":
+        return [];
+
       case "UPDATE_QUANTITY":
         if (action.payload.number < 1) {
           return state;
@@ -32,7 +39,7 @@ function App() {
         return state.map((item) =>
           item.name === action.payload.name
             ? { ...item, quantity: action.payload.number }
-            : item
+            : item,
         );
       default:
         return state;
@@ -46,52 +53,87 @@ function App() {
   return (
     <>
       <main>
-        <h3>Lista prodotti</h3>
+        <h3 className="title" ref={topRef}>
+          Lista prodotti
+        </h3>
         <ul>
           {products.map((p, i) => {
             return (
-              <li key={i}>
-                Nome: {p.name} Prezzo: {p.price}$
+              <li key={i} className="products">
+                Nome: <em>{p.name}</em>
+                <br />
+                Prezzo: <strong>{p.price}€</strong>
                 <button
                   onClick={() => dispatch({ type: "ADD_ITEM", payload: p })}
                 >
-                  +
+                  Aggiungi
                 </button>
               </li>
             );
           })}
         </ul>
-        <h3>Carrello</h3>
-        <ul>
-          {state?.map((p, i) => {
-            return (
-              <li key={i}>
-                Nome: {p.name}, Prezzo: {p.price}, Quantitá:
-                <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={p.quantity}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "UPDATE_QUANTITY",
-                      payload: { number: Number(e.target.value), name: p.name },
-                    })
-                  }
-                  required
-                />
-                <button
-                  onClick={() =>
-                    dispatch({ type: "REMOVE_ITEM", payload: p.name })
-                  }
-                >
-                  X
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <h4>Totale: {sumToPay.toFixed(2)}</h4>
+        {sumToPay > 0 && (
+          <>
+            <hr />
+            <h3 className="title carrello">Carrello</h3>
+            <ul>
+              {state?.map((p, i) => {
+                return (
+                  <li key={i}>
+                    Nome: <em>{p.name}</em> <br />
+                    Prezzo: <strong>{p.price}€</strong>, Quantitá:
+                    <input
+                      className="quantity"
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={p.quantity}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "UPDATE_QUANTITY",
+                          payload: {
+                            number: Number(e.target.value),
+                            name: p.name,
+                          },
+                        })
+                      }
+                      required
+                    />
+                    <button
+                      onClick={() =>
+                        dispatch({ type: "REMOVE_ITEM", payload: p.name })
+                      }
+                    >
+                      Rimuovi
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <button
+              className="svuota"
+              onClick={() => dispatch({ type: "CLEAR_ITEM" })}
+            >
+              Svuota il carrello
+            </button>
+          </>
+        )}
+        <h4 className={`title`}>
+          Totale:{" "}
+          <em
+            className={
+              sumToPay > 10 ? (sumToPay > 25 ? "red" : "yellow") : "green"
+            }
+          >
+            {sumToPay.toFixed(2)}€
+          </em>
+        </h4>
+        <button
+          className="scroll-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          Torna su
+        </button>
       </main>
     </>
   );
