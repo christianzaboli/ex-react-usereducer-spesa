@@ -21,14 +21,20 @@ function App() {
           (item) => item.name === action.payload.name,
         );
         if (productAdded) {
-          return state.map((p) => {
-            if (p.name === productAdded.name) {
-              return { ...p, quantity: p.quantity + 1 };
-            } else p;
-          });
+          action.payload.quantity = productAdded.quantity + 1;
         } else {
           return [...state, { ...action.payload, quantity: 1 }];
         }
+
+      case "UPDATE_QUANTITY":
+        if (action.payload.quantity < 1 || isNaN(action.payload.quantity)) {
+          return state;
+        }
+        return state.map((item) =>
+          item.name === action.payload.name
+            ? { ...item, quantity: action.payload.quantity }
+            : item,
+        );
 
       case "REMOVE_ITEM":
         return state.filter((p) => p.name !== action.payload);
@@ -36,15 +42,6 @@ function App() {
       case "CLEAR_ITEM":
         return [];
 
-      case "UPDATE_QUANTITY":
-        if (action.payload.number < 1) {
-          return state;
-        }
-        return state.map((item) =>
-          item.name === action.payload.name
-            ? { ...item, quantity: action.payload.number }
-            : item,
-        );
       default:
         return state;
     }
@@ -96,8 +93,8 @@ function App() {
                         dispatch({
                           type: "UPDATE_QUANTITY",
                           payload: {
-                            number: Number(e.target.value),
                             name: p.name,
+                            quantity: parseInt(e.target.value),
                           },
                         })
                       }
