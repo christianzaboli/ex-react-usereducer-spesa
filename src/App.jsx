@@ -17,11 +17,15 @@ function App() {
   function cartReducer(state, action) {
     switch (action.type) {
       case "ADD_ITEM":
-        const isProductAdded = state.some(
+        const productAdded = state.find(
           (item) => item.name === action.payload.name,
         );
-        if (isProductAdded) {
-          return state;
+        if (productAdded) {
+          return state.map((p) => {
+            if (p.name === productAdded.name) {
+              return { ...p, quantity: p.quantity + 1 };
+            } else p;
+          });
         } else {
           return [...state, { ...action.payload, quantity: 1 }];
         }
