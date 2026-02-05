@@ -1,4 +1,4 @@
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useMemo } from "react";
 import "./app.css";
 const products = [
   { name: "Mela", price: 0.5 },
@@ -47,9 +47,9 @@ function App() {
     }
   }
 
-  let sumToPay = state.reduce((tot, curr) => {
-    return tot + curr.price * curr.quantity;
-  }, 0);
+  const sumToPay = useMemo(() => {
+    return state.reduce((tot, curr) => tot + curr.price * curr.quantity, 0);
+  }, [state]);
 
   return (
     <>
